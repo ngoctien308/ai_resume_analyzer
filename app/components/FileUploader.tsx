@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 interface FileUploaderProps {
@@ -9,14 +9,14 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
     // every time a file is selected, call onFileSelect in order to set the file in the parent component
     const onDrop = useCallback((acceptedFiles: File[]) => {
         onFileSelect?.(acceptedFiles[0] || null);
+        setFile(acceptedFiles[0] || null);
     }, [onFileSelect]);
-
     const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
         onDrop,
-        multiple: false
+        multiple: false,
+        accept: { 'application/pdf': ['.pdf'] }
     });
-
-    const file = acceptedFiles[0] || null;
+    const [file, setFile] = useState<File | null>(null);
 
     return (
         <div className="w-full gradient-border">
@@ -35,9 +35,12 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                                 </div>
                             </div>
                             {/* Button to remove the selected file */}
-                            <button className="p-2 cursor-pointer" onClick={(e) => {
-                                onFileSelect?.(null)
-                            }}>
+                            <button
+                                className="p-2 cursor-pointer"
+                                onClick={(e) => {
+                                    onFileSelect?.(null)
+                                    setFile(null);
+                                }}>
                                 <img src="/icons/cross.svg" alt="remove" className="w-4 h-4" />
                             </button>
                         </div>
