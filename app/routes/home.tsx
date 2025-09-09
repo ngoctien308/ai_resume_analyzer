@@ -19,6 +19,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // set next variable to current path in order to redirect back after login
     if (!auth.isAuthenticated) navigate('/auth?next=/');
   }, [auth.isAuthenticated])
 

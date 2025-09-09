@@ -17,6 +17,7 @@ const auth = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // redirect to next if authenticated
         if(auth.isAuthenticated) navigate(next);
     }, [auth.isAuthenticated, next])
 
