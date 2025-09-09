@@ -1,10 +1,9 @@
 import NavBar from "~/components/NavBar";
 import type { Route } from "./+types/home";
-import { resumes } from "~/constants";
 import ResumeCard from "~/components/ResumeCard";
 import { usePuterStore } from "~/lib/puter";
-import { useLocation, useNavigate } from "react-router";
-import { useEffect } from "react";
+import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -15,13 +14,27 @@ export function meta({ }: Route.MetaArgs) {
 
 export default function Home() {
   // if the user is not authenticated, redirect to /auth
-  const { auth } = usePuterStore();
   const navigate = useNavigate();
+  const { auth, fs, kv } = usePuterStore();
+  const [resumes, setResumes] = useState<Resume[]>([]);
 
   useEffect(() => {
     // set next variable to current path in order to redirect back after login
     if (!auth.isAuthenticated) navigate('/auth?next=/');
   }, [auth.isAuthenticated])
+
+  useEffect(() => {
+    const loadResumes = async () => {
+      const resumes = (await kv.list('resume:*', true)) as KVItem[];
+      const parsedResumes = resumes?.map((resume) => (
+        JSON.parse(resume.value) as Resume
+      ))
+
+      setResumes(parsedResumes || []);
+    }
+
+    loadResumes();
+  }, [])
 
   return <main className="bg-[url('/images/bg-main.svg')] bg-cover">
     <NavBar />
