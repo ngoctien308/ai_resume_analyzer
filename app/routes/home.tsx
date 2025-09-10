@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "Resumind" },
+    { title: "CVise" },
     { name: "description", content: "Advanced, AI-powered feedback for your dream job!" },
   ];
 }
@@ -15,13 +15,14 @@ export function meta({ }: Route.MetaArgs) {
 export default function Home() {
   // if the user is not authenticated, redirect to /auth
   const navigate = useNavigate();
-  const { auth, fs, kv } = usePuterStore();
+  const { auth, kv } = usePuterStore();
   const [resumes, setResumes] = useState<Resume[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // set next variable to current path in order to redirect back after login
-    if (!auth.isAuthenticated) navigate('/auth?next=/');
-  }, [auth.isAuthenticated])
+    if (!isLoading && !auth.isAuthenticated) navigate('/auth?next=/');
+  }, [auth.isAuthenticated, isLoading])
 
   useEffect(() => {
     const loadResumes = async () => {
@@ -31,6 +32,7 @@ export default function Home() {
       ))
 
       setResumes(parsedResumes || []);
+      setIsLoading(false);
     }
 
     loadResumes();
@@ -42,16 +44,24 @@ export default function Home() {
     <section className="main-section">
       <div className="page-heading py-16">
         <h1>Track Your Applications & Resume Ratings</h1>
-        <h2>Review your submissions and check AI-powered feedback</h2>
+        {resumes.length === 0 ? (
+          <h2>Get started by uploading your resume!</h2>
+        ) : (
+          <h2>Review your submissions and check AI-powered feedback</h2>
+        )}
       </div>
 
-      {resumes.length > 0 && (
+      {isLoading && <div>
+        <img src="/images/resume-scan-2.gif" className="w-[200px]" />
+      </div>}
+
+      {!isLoading && resumes.length > 0 && (
         <div className="resumes-section">
           {resumes.map((resume) => {
             return <ResumeCard key={resume.id} resume={resume} />
           })}
         </div>
-      )}
+      )}    
     </section>
   </main>
 }

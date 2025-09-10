@@ -8,7 +8,7 @@ import Details from "~/components/Details";
 
 export function meta({ }: Route.MetaArgs) {
     return [
-        { title: "Resumind | Review" },
+        { title: "CVise | Review" },
         { name: "description", content: "Check your feedback about your resume." },
     ];
 }
