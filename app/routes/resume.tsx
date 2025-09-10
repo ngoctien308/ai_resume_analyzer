@@ -15,38 +15,40 @@ export function meta({ }: Route.MetaArgs) {
 
 const resume = () => {
     const { id } = useParams();
-    const { auth, isLoading, fs, kv } = usePuterStore();
+    const { auth, fs, kv } = usePuterStore();
     const [imageUrl, setImageUrl] = useState('');
     const [resumeUrl, setResumeUrl] = useState('');
     const [feedback, setFeedback] = useState<Feedback | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        if(!isLoading && !auth.isAuthenticated) navigate(`/auth?next=/resume/${id}`);
-    }, [isLoading])
+        if (!auth.isAuthenticated) navigate(`/auth?next=/resume/${id}`);
+    }, [auth.isAuthenticated])
 
     useEffect(() => {
         const loadResume = async () => {
             const resume = await kv.get(`resume:${id}`); // get data
 
-            if(!resume) return;
+            if (!resume) return;
 
             const data = JSON.parse(resume);
 
             const resumeBlob = await fs.read(data.resumePath);
-            if(!resumeBlob) return;
+            if (!resumeBlob) return;
 
+            // Wraps the PDF data in a Blob object for browser compatibility
             const pdfBlob = new Blob([resumeBlob], { type: 'application/pdf' });
+            // Creates a temporary URL for the Blob object so it can be used as a link
             const resumeUrl = URL.createObjectURL(pdfBlob);
             setResumeUrl(resumeUrl);
 
             const imageBlob = await fs.read(data.imagePath);
-            if(!imageBlob) return;
+            if (!imageBlob) return;
             const imageUrl = URL.createObjectURL(imageBlob);
             setImageUrl(imageUrl);
 
             setFeedback(data.feedback);
-            console.log({resumeUrl, imageUrl, feedback: data.feedback });
+            console.log({ resumeUrl, imageUrl, feedback: data.feedback });
         }
 
         loadResume();
@@ -92,4 +94,4 @@ const resume = () => {
     )
 }
 
-export default resume
+export default resume;
